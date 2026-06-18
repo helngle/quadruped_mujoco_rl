@@ -1,0 +1,115 @@
+<mujoco model="simple_quadruped">
+  <compiler angle="radian" coordinate="local"/>
+
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+
+  <default>
+    <geom friction="1.0 0.005 0.0001" density="500" rgba="0.75 0.78 0.82 1"/>
+    <joint damping="1.0" armature="0.01" limited="true"/>
+    <position kp="35" dampratio="1" ctrllimited="true"/>
+  </default>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512"
+             rgb1="0.18 0.20 0.22" rgb2="0.26 0.28 0.30"/>
+    <material name="ground" texture="grid" texrepeat="6 6" reflectance="0.15"/>
+    <material name="body" rgba="0.15 0.22 0.30 1"/>
+    <material name="leg" rgba="0.82 0.61 0.30 1"/>
+    <material name="foot" rgba="0.08 0.09 0.10 1"/>
+  </asset>
+
+  <worldbody>
+    <light name="key" pos="0 -3 4" dir="0 1 -1" diffuse="0.8 0.8 0.8"/>
+    <geom name="floor" type="plane" size="8 8 0.1" material="ground"/>
+
+    <body name="base" pos="0 0 0.38">
+      <freejoint name="base_free"/>
+      <geom name="base_geom" type="box" size="0.28 0.14 0.055" material="body" mass="4.0"/>
+      <site name="base_site" pos="0 0 0" size="0.015" rgba="0.1 0.8 0.9 1"/>
+
+      <body name="front_left_hip" pos="0.20 0.11 0">
+        <joint name="fl_hip_abduction" type="hinge" axis="1 0 0" range="-0.7 0.7"/>
+        <geom name="fl_hip_geom" type="capsule" fromto="0 0 0 0 0.05 0" size="0.025" material="leg" mass="0.15"/>
+        <body name="front_left_thigh" pos="0 0.05 0">
+          <joint name="fl_hip_pitch" type="hinge" axis="0 1 0" range="-1.2 1.2"/>
+          <geom name="fl_thigh_geom" type="capsule" fromto="0 0 0 0 0 -0.18" size="0.025" material="leg" mass="0.35"/>
+          <body name="front_left_calf" pos="0 0 -0.18">
+            <joint name="fl_knee" type="hinge" axis="0 1 0" range="-2.3 -0.15"/>
+            <geom name="fl_calf_geom" type="capsule" fromto="0 0 0 0 0 -0.18" size="0.022" material="leg" mass="0.25"/>
+            <body name="front_left_foot" pos="0 0 -0.19">
+              <geom name="fl_foot_geom" type="sphere" size="0.035" material="foot" mass="0.08"/>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <body name="front_right_hip" pos="0.20 -0.11 0">
+        <joint name="fr_hip_abduction" type="hinge" axis="1 0 0" range="-0.7 0.7"/>
+        <geom name="fr_hip_geom" type="capsule" fromto="0 0 0 0 -0.05 0" size="0.025" material="leg" mass="0.15"/>
+        <body name="front_right_thigh" pos="0 -0.05 0">
+          <joint name="fr_hip_pitch" type="hinge" axis="0 1 0" range="-1.2 1.2"/>
+          <geom name="fr_thigh_geom" type="capsule" fromto="0 0 0 0 0 -0.18" size="0.025" material="leg" mass="0.35"/>
+          <body name="front_right_calf" pos="0 0 -0.18">
+            <joint name="fr_knee" type="hinge" axis="0 1 0" range="-2.3 -0.15"/>
+            <geom name="fr_calf_geom" type="capsule" fromto="0 0 0 0 0 -0.18" size="0.022" material="leg" mass="0.25"/>
+            <body name="front_right_foot" pos="0 0 -0.19">
+              <geom name="fr_foot_geom" type="sphere" size="0.035" material="foot" mass="0.08"/>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <body name="rear_left_hip" pos="-0.20 0.11 0">
+        <joint name="rl_hip_abduction" type="hinge" axis="1 0 0" range="-0.7 0.7"/>
+        <geom name="rl_hip_geom" type="capsule" fromto="0 0 0 0 0.05 0" size="0.025" material="leg" mass="0.15"/>
+        <body name="rear_left_thigh" pos="0 0.05 0">
+          <joint name="rl_hip_pitch" type="hinge" axis="0 1 0" range="-1.2 1.2"/>
+          <geom name="rl_thigh_geom" type="capsule" fromto="0 0 0 0 0 -0.18" size="0.025" material="leg" mass="0.35"/>
+          <body name="rear_left_calf" pos="0 0 -0.18">
+            <joint name="rl_knee" type="hinge" axis="0 1 0" range="-2.3 -0.15"/>
+            <geom name="rl_calf_geom" type="capsule" fromto="0 0 0 0 0 -0.18" size="0.022" material="leg" mass="0.25"/>
+            <body name="rear_left_foot" pos="0 0 -0.19">
+              <geom name="rl_foot_geom" type="sphere" size="0.035" material="foot" mass="0.08"/>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <body name="rear_right_hip" pos="-0.20 -0.11 0">
+        <joint name="rr_hip_abduction" type="hinge" axis="1 0 0" range="-0.7 0.7"/>
+        <geom name="rr_hip_geom" type="capsule" fromto="0 0 0 0 -0.05 0" size="0.025" material="leg" mass="0.15"/>
+        <body name="rear_right_thigh" pos="0 -0.05 0">
+          <joint name="rr_hip_pitch" type="hinge" axis="0 1 0" range="-1.2 1.2"/>
+          <geom name="rr_thigh_geom" type="capsule" fromto="0 0 0 0 0 -0.18" size="0.025" material="leg" mass="0.35"/>
+          <body name="rear_right_calf" pos="0 0 -0.18">
+            <joint name="rr_knee" type="hinge" axis="0 1 0" range="-2.3 -0.15"/>
+            <geom name="rr_calf_geom" type="capsule" fromto="0 0 0 0 0 -0.18" size="0.022" material="leg" mass="0.25"/>
+            <body name="rear_right_foot" pos="0 0 -0.19">
+              <geom name="rr_foot_geom" type="sphere" size="0.035" material="foot" mass="0.08"/>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <position name="fl_hip_abduction_position" joint="fl_hip_abduction" ctrlrange="-0.7 0.7"/>
+    <position name="fl_hip_pitch_position" joint="fl_hip_pitch" ctrlrange="-1.2 1.2"/>
+    <position name="fl_knee_position" joint="fl_knee" ctrlrange="-2.3 -0.15"/>
+    <position name="fr_hip_abduction_position" joint="fr_hip_abduction" ctrlrange="-0.7 0.7"/>
+    <position name="fr_hip_pitch_position" joint="fr_hip_pitch" ctrlrange="-1.2 1.2"/>
+    <position name="fr_knee_position" joint="fr_knee" ctrlrange="-2.3 -0.15"/>
+    <position name="rl_hip_abduction_position" joint="rl_hip_abduction" ctrlrange="-0.7 0.7"/>
+    <position name="rl_hip_pitch_position" joint="rl_hip_pitch" ctrlrange="-1.2 1.2"/>
+    <position name="rl_knee_position" joint="rl_knee" ctrlrange="-2.3 -0.15"/>
+    <position name="rr_hip_abduction_position" joint="rr_hip_abduction" ctrlrange="-0.7 0.7"/>
+    <position name="rr_hip_pitch_position" joint="rr_hip_pitch" ctrlrange="-1.2 1.2"/>
+    <position name="rr_knee_position" joint="rr_knee" ctrlrange="-2.3 -0.15"/>
+  </actuator>
+
+  <keyframe>
+    <key name="stand" qpos="0 0 0.32 1 0 0 0 0.15 0.65 -1.3 -0.15 0.65 -1.3 0.15 0.65 -1.3 -0.15 0.65 -1.3"
+         ctrl="0.15 0.65 -1.3 -0.15 0.65 -1.3 0.15 0.65 -1.3 -0.15 0.65 -1.3"/>
+  </keyframe>
+</mujoco>

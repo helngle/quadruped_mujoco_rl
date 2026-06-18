@@ -1,0 +1,35 @@
+model_path: assets/robots/unitree_go2/scene.xml
+episode_length: 1000
+control_timestep: 0.02
+initial_keyframe: home
+initial_base_height: 0.27
+default_joint_qpos:
+  - 0.0
+  - 0.9
+  - -1.8
+  - 0.0
+  - 0.9
+  - -1.8
+  - 0.0
+  - 0.9
+  - -1.8
+  - 0.0
+  - 0.9
+  - -1.8
+
+action:
+  type: pd_position
+  scale: 0.35
+  kp: 35.0
+  kd: 1.0
+
+reward:
+  forward_velocity: 1.0
+  upright: 0.5
+  energy_penalty: 0.0005
+  action_smoothness: 0.02
+  fall_penalty: 5.0
+
+termination:
+  min_base_height: 0.16
+  max_roll_pitch: 0.9
