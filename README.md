@@ -52,7 +52,9 @@ Planned training commands:
 ```bash
 python -m quadruped_mujoco_rl.training.train_ppo --config configs/train_ppo.yaml
 python -m quadruped_mujoco_rl.training.train_ppo --config configs/train_ppo_go2.yaml
+python -m quadruped_mujoco_rl.training.train_ppo --config configs/train_ppo_go2_lr1e-4.yaml
 python -m quadruped_mujoco_rl.training.evaluate --checkpoint runs/ppo/checkpoints/final_model.zip
+python -m quadruped_mujoco_rl.training.evaluate --config configs/env_go2.yaml --checkpoint runs/ppo_go2/checkpoints/go2_1m_baseline.zip --episodes 3 --no-render
 ```
 
 For a quick smoke run before a long training job:
