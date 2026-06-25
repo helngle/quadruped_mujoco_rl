@@ -1,0 +1,80 @@
+model_path: assets/robots/unitree_go2/scene.xml
+velocity_frame: body
+episode_length: 1000
+control_timestep: 0.02
+initial_keyframe: home
+initial_base_height: 0.27
+base_body_name: base
+foot_geom_names:
+  - FL
+  - FR
+  - RL
+  - RR
+ground_geom_name: floor
+default_joint_qpos:
+  - 0.0
+  - 0.9
+  - -1.8
+  - 0.0
+  - 0.9
+  - -1.8
+  - 0.0
+  - 0.9
+  - -1.8
+  - 0.0
+  - 0.9
+  - -1.8
+
+action:
+  type: pd_position
+  scale: 0.35
+  kp: 35.0
+  kd: 1.0
+
+observation:
+  type: locomotion
+  scales:
+    linear_velocity: 2.0
+    angular_velocity: 0.25
+    command_velocity: 2.0
+    command_yaw_rate: 0.25
+    joint_position: 1.0
+    joint_velocity: 0.05
+
+gait:
+  enabled: false
+
+command:
+  enabled: true
+  resample_time: 4.0
+  vx_range: [0.5, 1.0]
+  yaw_rate_range: [0.0, 0.0]
+  min_abs_yaw_rate: 0.0
+  stand_probability: 0.0
+  turn_probability: 0.0
+  straight_probability: 1.0
+
+reward:
+  type: canonical
+  linear_velocity_tracking: 1.5
+  linear_velocity_tracking_sigma: 0.5
+  yaw_rate_tracking: 0.75
+  yaw_rate_tracking_sigma: 0.5
+  vertical_velocity_penalty: 2.0
+  angular_velocity_xy_penalty: 0.05
+  flat_orientation_penalty: 2.5
+  joint_torque_penalty: 0.00002
+  action_rate_penalty: 0.01
+  joint_posture_penalty: 0.02
+  foot_slip_penalty: 0.1
+  feet_air_time_reward: 0.1
+  feet_air_time_threshold: 0.15
+  feet_air_time_max: 0.5
+  undesired_contact_penalty: 1.0
+  base_height_target: 0.27
+  base_height_penalty: 1.0
+  fall_penalty: 20.0
+
+termination:
+  min_base_height: 0.16
+  max_roll_pitch: 0.9

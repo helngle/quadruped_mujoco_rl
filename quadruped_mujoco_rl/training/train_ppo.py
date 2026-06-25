@@ -42,7 +42,73 @@ def build_model(env, config: dict[str, Any], log_dir: Path) -> PPO:
         tensorboard_log=str(log_dir),
         verbose=1,
         seed=int(config["seed"]),
+        device=str(config.get("device", "auto")),
     )
+
+
+def transfer_policy_weights(source: PPO, target: PPO) -> tuple[int, int, list[str]]:
+    """Copy a policy into a compatible policy with extra observation inputs."""
+    source_state = source.policy.state_dict()
+    target_state = target.policy.state_dict()
+    expanded_input_keys = {
+        "mlp_extractor.policy_net.0.weight",
+        "mlp_extractor.value_net.0.weight",
+    }
+    copied = 0
+    expanded = 0
+    skipped = []
+
+    for key, target_tensor in target_state.items():
+        source_tensor = source_state.get(key)
+        if source_tensor is None:
+            skipped.append(key)
+            continue
+
+        source_tensor = source_tensor.to(
+            device=target_tensor.device,
+            dtype=target_tensor.dtype,
+        )
+        if source_tensor.shape == target_tensor.shape:
+            target_state[key] = source_tensor.clone()
+            copied += 1
+            continue
+
+        can_expand_input = (
+            key in expanded_input_keys
+            and source_tensor.ndim == 2
+            and target_tensor.ndim == 2
+            and source_tensor.shape[0] == target_tensor.shape[0]
+            and source_tensor.shape[1] < target_tensor.shape[1]
+        )
+        if can_expand_input:
+            expanded_tensor = target_tensor.clone()
+            expanded_tensor[:, : source_tensor.shape[1]] = source_tensor
+            expanded_tensor[:, source_tensor.shape[1] :] = 0.0
+            target_state[key] = expanded_tensor
+            expanded += 1
+            continue
+
+        skipped.append(key)
+
+    target.policy.load_state_dict(target_state)
+    return copied, expanded, skipped
+
+
+def initialize_policy_from_checkpoint(model: PPO, checkpoint: str, device: str) -> None:
+    source = PPO.load(resolve_project_path(checkpoint), device=device)
+    if source.action_space.shape != model.action_space.shape:
+        raise ValueError(
+            "Source and target action spaces must match: "
+            f"{source.action_space.shape} != {model.action_space.shape}"
+        )
+
+    copied, expanded, skipped = transfer_policy_weights(source, model)
+    print(
+        f"Initialized policy from {resolve_project_path(checkpoint)} "
+        f"(copied={copied}, expanded_inputs={expanded}, skipped={len(skipped)})"
+    )
+    if skipped:
+        print(f"Skipped incompatible policy tensors: {', '.join(skipped)}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,6 +119,17 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=None,
         help="Override total_timesteps from the YAML config.",
+    )
+    checkpoint_group = parser.add_mutually_exclusive_group()
+    checkpoint_group.add_argument(
+        "--resume",
+        default=None,
+        help="Resume PPO weights and optimizer state from a checkpoint.",
+    )
+    checkpoint_group.add_argument(
+        "--init-from",
+        default=None,
+        help="Initialize compatible policy weights without restoring optimizer state.",
     )
     return parser.parse_args()
 
@@ -81,8 +158,26 @@ def main() -> None:
     )
 
     try:
-        model = build_model(env, config, log_dir)
-        model.learn(total_timesteps=total_timesteps, tb_log_name="ppo")
+        if args.resume:
+            model = PPO.load(
+                resolve_project_path(args.resume),
+                env=env,
+                tensorboard_log=str(log_dir),
+                device=str(config.get("device", "auto")),
+            )
+        else:
+            model = build_model(env, config, log_dir)
+            if args.init_from:
+                initialize_policy_from_checkpoint(
+                    model,
+                    checkpoint=args.init_from,
+                    device=str(config.get("device", "auto")),
+                )
+        model.learn(
+            total_timesteps=total_timesteps,
+            tb_log_name="ppo",
+            reset_num_timesteps=not bool(args.resume),
+        )
 
         final_path = checkpoint_dir / "final_model"
         model.save(final_path)
